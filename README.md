@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+Um sistema leve e inteligente de gestão de aulas e presença para professores de Jiu-Jitsu. O projeto foi concebido como um MVP (Produto Mínimo Viável) que utiliza uma arquitetura serverless econômica, performática e sem a necessidade inicial de um banco de dados relacional tradicional.
 
-First, run the development server:
+## 🚀 Conceito & Filosofia do Projeto
+O objetivo principal é tirar a caderneta de papel da mão do professor de Jiu-Jitsu. O sistema foca em usabilidade rápida no ecossistema de tatame: cadastrar alunos, registrar a aula do dia e marcar presenças de forma ágil através de checkboxes.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Stack Tecnológica
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+* **Backend:** Node.js (utilizar melhor framework melhor tecnologia)
+* **Front-end:** React / Next.js ou HTML/JS limpo utilizando a biblioteca de componentes **Watermelon UI**.
+* **Banco de Dados (Temporário):** Google Sheets (Acessado via Google Apps Script ou Google Sheets API).
+* **Inteligência (Sugestões):** Integração com LLM (via API da Anthropic/Claude ou OpenAI) para geração de treinos baseados no histórico.
+* **Ferramenta de Desenvolvimento Principal:** Claude Code (CLI).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 📅 Ideias Iniciais (Escopo do MVP)
 
-To learn more about Next.js, take a look at the following resources:
+### 1. Autenticação e Telas (Professor)
+* **Página de Login:** Acesso restrito para o professor.
+* **Dashboard / Lista de Alunos:** Visualização de todos os alunos ativos, suas respectivas faixas (Branca a Preta) e graus.
+* **Cadastro de Alunos:** Formulário simples para inserção de novos praticantes.
+* **Cadastro de Aula + Chamada:** Tela onde o professor seleciona a data, o tipo de aula (Kimono ou NoGi) e marca os alunos presentes via checkbox.
+* **Lista de Aulas:** Histórico do que já foi passado no tatame.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2. Estrutura do "Banco" (Google Sheets)
+O Google Sheets será dividido nas seguintes abas:
+* `Alunos`: ID, Nome, Faixa, Graus, Data de Nascimento, Status (Ativo/Inativo).
+* `Aulas`: ID, Data, Tipo (Kimono/NoGi), Conteúdo Principal, Categoria (Ex: Passagem, Guarda, Quedas).
+* `Presencas`: ID, ID_Aula, ID_Aluno.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🧠 O Diferencial: IA Dentro do Sistema (Sugestão de Aulas)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Em vez de algoritmos rígidos de recomendação, o sistema contará com um módulo de IA no backend. 
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Como vai funcionar:
+1. Ao abrir a tela de nova aula, o Node.js busca no Google Sheets as últimas 10 aulas ministradas e a lista de alunos que costumam frequentar aquele horário.
+2. O sistema envia um prompt para a API de IA contendo esse histórico e o perfil técnico da turma (predominância de faixas brancas, azuis, etc.).
+3. A IA retorna:
+   * **Sugestão de Tema:** O foco técnico ideal para o dia (ex: *"Ataques partindo da Meia-Guarda por Baixo"*).
+   * **Justificativa:** O motivo pedagógico da escolha (ex: *"Nas últimas 3 aulas o foco foi passagem de guarda, está na hora de trabalhar a retenção e contra-ataque"*).
+   * **Estrutura do Treino:** Sugestão de aquecimento específico, técnica do dia e dinâmica de rolas (treino livre).
+
+---
+
+## 🔮 Ideias Futuras (Roadmap de Evolução)
+
+* **Portal do Aluno:** Área logada para o aluno visualizar seu histórico de presença, aulas assistidas e progresso de graus/faixas.
+* **Análise de Desempenho por IA:** Relatórios automáticos para o professor indicando quais alunos estão estagnados em frequência ou quais estão prontos para receber o próximo grau.
+* **Migração de Banco de Dados:** Quando o volume de dados escalar, migrar do Google Sheets para um banco relacional (PostgreSQL / Supabase) sem alterar a regra de negócio do front-end.
+* **Controle de Mensalidades:** Módulo financeiro simples para checar quem está em dia direto na tela de chamada.
