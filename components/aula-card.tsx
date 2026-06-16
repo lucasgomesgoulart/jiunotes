@@ -86,7 +86,7 @@ export function AulaCard({ data, tipo, categoria, conteudo, presentes, onClick }
           <div className="ml-auto flex items-center">
             <div className="flex">
               {presentes.map((p, i) => (
-                <div key={i} style={{ marginLeft: i === 0 ? 0 : -10 }}>
+                <div key={i} style={{ marginLeft: i === 0 ? 0 : -6 }}>
                   <Avatar nome={p.nome} faixa={p.faixa} />
                 </div>
               ))}

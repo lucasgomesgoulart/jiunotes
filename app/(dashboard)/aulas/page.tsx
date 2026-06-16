@@ -66,7 +66,7 @@ export default function AulasPage() {
 
   return (
     <>
-      <TopHeader title="Aulas" showLogout />
+      <TopHeader title="JiuNotes" showLogout />
 
       <div className="mx-auto w-full max-w-sm px-5 pb-32 pt-4">
         <div className="mb-4 flex items-center justify-between">

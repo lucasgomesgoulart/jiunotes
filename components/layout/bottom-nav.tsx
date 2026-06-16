@@ -36,9 +36,16 @@ const NAV_ITEMS = [
   },
 ]
 
+// O menu só aparece nas 3 abas principais. Telas de tela cheia (perfil, graduar,
+// nova/editar aula, novo aluno) têm voltar próprio e não devem mostrar o menu —
+// senão ele sobrepõe os botões de ação (ex.: "Confirmar graduação", "Salvar aula").
+const ABAS_COM_NAV = ['/dashboard', '/alunos', '/aulas']
+
 export function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
+
+  if (!ABAS_COM_NAV.includes(pathname)) return null
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-4 pb-8 pt-2.5">
