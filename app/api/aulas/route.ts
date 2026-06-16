@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAulas, createAula, createPresencas, getPresencasByAula } from '@/lib/db'
+import { getSession } from '@/lib/session'
 import { AulaComPresencas } from '@/types'
 
 export async function GET() {
   try {
-    const aulas = await getAulas()
+    const session = await getSession()
+    const professorId = session.professorName || 'jiu123'
+    const aulas = await getAulas(professorId)
     const aulasComPresencas: AulaComPresencas[] = await Promise.all(
       aulas.map(async (aula) => {
         const presencas = await getPresencasByAula(aula.id)
@@ -20,8 +23,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getSession()
+    const professorId = session.professorName || 'jiu123'
     const { presencas, ...aulaData } = await request.json()
-    const aula = await createAula(aulaData)
+    const aula = await createAula({ ...aulaData, professorId })
     if (presencas?.length) {
       await createPresencas(aula.id, presencas)
     }

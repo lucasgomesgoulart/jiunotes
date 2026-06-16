@@ -38,7 +38,7 @@ export async function getAlunos(): Promise<Aluno[]> {
   const sql = getSql()
   const rows = await sql`
     select id, nome, faixa, graus,
-           coalesce(data_nascimento, '') as "dataNascimento", status
+           coalesce(data_nascimento, '') as "dataNascimento", status, professor_id as "professorId"
     from alunos
     order by nome`
   return rows as Aluno[]
@@ -47,8 +47,8 @@ export async function getAlunos(): Promise<Aluno[]> {
 export async function createAluno(data: Omit<Aluno, 'id'>): Promise<Aluno> {
   const sql = getSql()
   const [row] = await sql`
-    insert into alunos (nome, faixa, graus, data_nascimento, status)
-    values (${data.nome}, ${data.faixa}, ${data.graus}, ${data.dataNascimento || null}, ${data.status})
+    insert into alunos (nome, faixa, graus, data_nascimento, status, professor_id)
+    values (${data.nome}, ${data.faixa}, ${data.graus}, ${data.dataNascimento || null}, ${data.status}, ${data.professorId})
     returning id`
   return { id: row.id, ...data }
 }
@@ -57,14 +57,14 @@ export async function updateAluno(id: string, data: Partial<Omit<Aluno, 'id'>>):
   const sql = getSql()
   const [aluno] = await sql`
     select id, nome, faixa, graus,
-           coalesce(data_nascimento, '') as "dataNascimento", status
+           coalesce(data_nascimento, '') as "dataNascimento", status, professor_id as "professorId"
     from alunos where id = ${id}`
   if (!aluno) throw new Error(`Aluno ${id} não encontrado`)
   const m = { ...(aluno as Aluno), ...data }
   await sql`
     update alunos
     set nome = ${m.nome}, faixa = ${m.faixa}, graus = ${m.graus},
-        data_nascimento = ${m.dataNascimento || null}, status = ${m.status}
+        data_nascimento = ${m.dataNascimento || null}, status = ${m.status}, professor_id = ${m.professorId}
     where id = ${id}`
 }
 
@@ -76,21 +76,28 @@ export async function deleteAluno(id: string): Promise<void> {
 
 // ─── Aulas ────────────────────────────────────────────────────────────────────
 
-export async function getAulas(): Promise<Aula[]> {
+export async function getAulas(professorId?: string): Promise<Aula[]> {
   const sql = getSql()
-  const rows = await sql`
-    select id, data, tipo,
-           conteudo_principal as "conteudoPrincipal", categoria
-    from aulas
-    order by data desc`
+  const rows = professorId
+    ? await sql`
+        select id, data, tipo,
+               conteudo_principal as "conteudoPrincipal", categoria, professor_id as "professorId"
+        from aulas
+        where professor_id = ${professorId}
+        order by data desc`
+    : await sql`
+        select id, data, tipo,
+               conteudo_principal as "conteudoPrincipal", categoria, professor_id as "professorId"
+        from aulas
+        order by data desc`
   return rows as Aula[]
 }
 
 export async function createAula(data: Omit<Aula, 'id'>): Promise<Aula> {
   const sql = getSql()
   const [row] = await sql`
-    insert into aulas (data, tipo, conteudo_principal, categoria)
-    values (${data.data}, ${data.tipo}, ${data.conteudoPrincipal}, ${data.categoria})
+    insert into aulas (data, tipo, conteudo_principal, categoria, professor_id)
+    values (${data.data}, ${data.tipo}, ${data.conteudoPrincipal}, ${data.categoria}, ${data.professorId})
     returning id`
   return { id: row.id, ...data }
 }
@@ -99,7 +106,7 @@ export async function getAulaComPresencas(id: string): Promise<AulaComPresencas 
   const sql = getSql()
   const [aula] = await sql`
     select id, data, tipo,
-           conteudo_principal as "conteudoPrincipal", categoria
+           conteudo_principal as "conteudoPrincipal", categoria, professor_id as "professorId"
     from aulas where id = ${id}`
   if (!aula) return null
   const pres = await sql`select id_aluno from presencas where id_aula = ${id}`
@@ -110,14 +117,14 @@ export async function updateAula(id: string, data: Partial<Omit<Aula, 'id'>>): P
   const sql = getSql()
   const [aula] = await sql`
     select id, data, tipo,
-           conteudo_principal as "conteudoPrincipal", categoria
+           conteudo_principal as "conteudoPrincipal", categoria, professor_id as "professorId"
     from aulas where id = ${id}`
   if (!aula) throw new Error(`Aula ${id} não encontrada`)
   const m = { ...(aula as Aula), ...data }
   await sql`
     update aulas
     set data = ${m.data}, tipo = ${m.tipo},
-        conteudo_principal = ${m.conteudoPrincipal}, categoria = ${m.categoria}
+        conteudo_principal = ${m.conteudoPrincipal}, categoria = ${m.categoria}, professor_id = ${m.professorId}
     where id = ${id}`
 }
 
@@ -127,14 +134,22 @@ export async function deleteAula(id: string): Promise<void> {
   await sql`delete from aulas where id = ${id}`
 }
 
-export async function getUltimasAulas(limit = 10): Promise<Aula[]> {
+export async function getUltimasAulas(limit = 10, professorId?: string): Promise<Aula[]> {
   const sql = getSql()
-  const rows = await sql`
-    select id, data, tipo,
-           conteudo_principal as "conteudoPrincipal", categoria
-    from aulas
-    order by data desc
-    limit ${limit}`
+  const rows = professorId
+    ? await sql`
+        select id, data, tipo,
+               conteudo_principal as "conteudoPrincipal", categoria, professor_id as "professorId"
+        from aulas
+        where professor_id = ${professorId}
+        order by data desc
+        limit ${limit}`
+    : await sql`
+        select id, data, tipo,
+               conteudo_principal as "conteudoPrincipal", categoria, professor_id as "professorId"
+        from aulas
+        order by data desc
+        limit ${limit}`
   return rows as Aula[]
 }
 
@@ -227,7 +242,8 @@ export async function initDb(): Promise<void> {
       faixa text not null default 'Branca',
       graus int not null default 0,
       data_nascimento text,
-      status text not null default 'Ativo'
+      status text not null default 'Ativo',
+      professor_id text not null default 'jiu123'
     )`
   await sql`
     create table if not exists aulas (
@@ -235,7 +251,8 @@ export async function initDb(): Promise<void> {
       data text not null,
       tipo text not null default 'Kimono',
       conteudo_principal text not null default '',
-      categoria text not null default 'Outro'
+      categoria text not null default 'Outro',
+      professor_id text not null default 'jiu123'
     )`
   await sql`
     create table if not exists presencas (

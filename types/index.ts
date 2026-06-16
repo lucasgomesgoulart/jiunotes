@@ -32,6 +32,7 @@ export interface Aluno {
   graus: number
   dataNascimento: string
   status: 'Ativo' | 'Inativo'
+  professorId: string
 }
 
 export interface Aula {
@@ -41,6 +42,7 @@ export interface Aula {
   conteudoPrincipal: string
   /** Uma ou mais categorias, separadas por ", " (ex.: "Quedas, Passagem de Guarda"). */
   categoria: string
+  professorId: string
 }
 
 export interface Presenca {

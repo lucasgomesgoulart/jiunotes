@@ -11,7 +11,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { MicButton } from '@/components/ui/mic-button'
 import { Belt } from '@/components/belt'
 import { cn } from '@/lib/utils'
-
 /**
  * AulaForm — formulário "uma tela só" compartilhado entre Nova aula e Editar aula.
  * - Sem `aula`  → modo criação  (POST /api/aulas)
@@ -19,6 +18,8 @@ import { cn } from '@/lib/utils'
  *
  * A categoria aceita VÁRIAS tags por aula (ex.: "Quedas, Passagem de Guarda").
  * Guardamos como string separada por ", ".
+ *
+ * Alunos são ordenados: meus alunos primeiro, depois do outro professor com badge.
  */
 
 const TIPOS: { value: TipoAula; label: string }[] = [
@@ -53,6 +54,7 @@ export function AulaForm({ aula }: AulaFormProps) {
   const [loading, setLoading] = useState(false)
   const [apagando, setApagando] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const [professorId, setProfessorId] = useState('jiu123')
   const [alunos, setAlunos] = useState<Aluno[]>([])
   const [presentes, setPresentes] = useState<Set<string>>(new Set(aula?.presencas ?? []))
   const [categorias, setCategorias] = useState<Set<CategoriaAula>>(new Set(parseCategorias(aula?.categoria)))
@@ -63,11 +65,26 @@ export function AulaForm({ aula }: AulaFormProps) {
   })
 
   useEffect(() => {
+    // Pega professor logado
+    fetch('/api/session')
+      .then((r) => r.json())
+      .then((data: { professorName: string }) => setProfessorId(data.professorName))
+      .catch(() => setProfessorId('jiu123'))
+
+    // Pega alunos (todos, mas ordena os meus primeiro)
     fetch('/api/alunos')
       .then((r) => r.json())
-      .then((data: Aluno[]) => setAlunos(Array.isArray(data) ? data.filter((a) => a.status === 'Ativo') : []))
+      .then((data: Aluno[]) => {
+        if (Array.isArray(data)) {
+          const ativos = data.filter((a) => a.status === 'Ativo')
+          // Ordena: meus alunos primeiro, depois do outro professor
+          const meus = ativos.filter((a) => a.professorId === professorId)
+          const outros = ativos.filter((a) => a.professorId !== professorId)
+          setAlunos([...meus, ...outros])
+        }
+      })
       .catch(() => setAlunos([]))
-  }, [])
+  }, [professorId])
 
   function togglePresente(id: string) {
     setPresentes((prev) => {
@@ -249,12 +266,14 @@ export function AulaForm({ aula }: AulaFormProps) {
         <div className="space-y-2.5">
           {alunos.map((aluno) => {
             const on = presentes.has(aluno.id)
+            const ehOutroProfessor = aluno.professorId !== professorId
             return (
               <label
                 key={aluno.id}
                 className={cn(
                   'flex cursor-pointer items-center gap-3.5 rounded-2xl border-[1.5px] px-[15px] py-3 transition-all active:scale-[0.99]',
-                  on ? 'border-primary bg-primary/[0.08]' : 'border-input bg-card'
+                  on ? 'border-primary bg-primary/[0.08]' : 'border-input bg-card',
+                  ehOutroProfessor && !on && 'opacity-75'
                 )}
               >
                 <input type="checkbox" checked={on} onChange={() => togglePresente(aluno.id)} className="sr-only" />
@@ -270,7 +289,12 @@ export function AulaForm({ aula }: AulaFormProps) {
                     </svg>
                   )}
                 </span>
-                <span className="flex-1 text-[15.5px] font-bold">{aluno.nome}</span>
+                <div className="flex-1">
+                  <span className="text-[15.5px] font-bold">{aluno.nome}</span>
+                  {ehOutroProfessor && (
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Aluno de outro professor</p>
+                  )}
+                </div>
                 <Belt faixa={aluno.faixa} graus={aluno.graus} width={44} />
               </label>
             )
