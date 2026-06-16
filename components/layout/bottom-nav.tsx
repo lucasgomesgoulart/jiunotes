@@ -42,7 +42,15 @@ export function BottomNav() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-4 pb-8 pt-2.5">
-      <div className="flex w-full max-w-sm items-center gap-1 rounded-3xl border border-white/10 bg-[#16181e]/92 px-2 py-3 shadow-[0_-6px_24px_rgba(0,0,0,0.4)] backdrop-blur">
+      <div
+        className="flex w-full max-w-sm items-center gap-1 px-2 py-3"
+        style={{
+          background: '#1D2436',
+          border: '1.5px solid rgba(255,255,255,0.2)',
+          borderRadius: 24,
+          boxShadow: '0 -20px 48px rgba(0,0,0,0.85), 0 4px 16px rgba(0,0,0,0.5)',
+        }}
+      >
         {NAV_ITEMS.map((item) => {
           const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
           return (

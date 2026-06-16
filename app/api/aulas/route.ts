@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAulas, createAula, createPresencas, getPresencasByAula } from '@/lib/sheets'
+import { getAulas, createAula, createPresencas, getPresencasByAula } from '@/lib/db'
 import { AulaComPresencas } from '@/types'
 
 export async function GET() {

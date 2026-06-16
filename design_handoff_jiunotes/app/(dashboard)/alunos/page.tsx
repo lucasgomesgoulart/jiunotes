@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Aluno } from '@/types'
 import { Belt } from '@/components/belt'
 import { TopHeader } from '@/components/layout/top-header'
+import { cn } from '@/lib/utils'
 
 /**
  * Alunos — Versão final "Dojo Escuro".
@@ -22,8 +23,7 @@ export default function AlunosPage() {
   useEffect(() => {
     fetch('/api/alunos')
       .then((r) => r.json())
-      .then((data: Aluno[]) => setAlunos(Array.isArray(data) ? data.filter((a) => a.status === 'Ativo') : []))
-      .catch(() => setAlunos([]))
+      .then((data: Aluno[]) => setAlunos(data.filter((a) => a.status === 'Ativo')))
   }, [])
 
   async function confirmarInativar() {
@@ -92,8 +92,8 @@ export default function AlunosPage() {
             <div className="flex justify-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-500/16 text-amber-400">
                 <svg viewBox="0 0 24 24" fill="none" className="h-8 w-8" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3.5L22 20H2L12 3.5z" />
-                  <path strokeLinecap="round" d="M12 10v4.5M12 17.4h.01" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3.5L22 20H2L12 3.5z"/>
+                  <path strokeLinecap="round" d="M12 10v4.5M12 17.4h.01"/>
                 </svg>
               </div>
             </div>

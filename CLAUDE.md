@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev          # start dev server
 npm run build        # production build
 npm run lint         # run ESLint
-npm run setup:sheets # initialize Google Sheets headers (one-time)
+# DB setup: paste schema.sql into the Neon SQL Editor (one-time)
 ```
 
 No test suite is configured.
@@ -23,16 +23,14 @@ See `SETUP.md` for full setup. All must be in `.env.local`:
 |---|---|
 | `PROFESSOR_PASSWORD` | Login password |
 | `SESSION_SECRET` | ≥32-char string for iron-session |
-| `GOOGLE_SHEETS_ID` | Spreadsheet ID from the URL |
-| `GOOGLE_SERVICE_ACCOUNT_EMAIL` | GCP service account email |
-| `GOOGLE_PRIVATE_KEY` | GCP private key (`\n` as literal newlines) |
+| `DATABASE_URL` | Postgres (Neon) connection string — use the **pooled** variant |
 | `ANTHROPIC_API_KEY` | Claude API key |
 
 ## Architecture
 
 **Single-teacher app** — no user table, auth is just a password checked in `app/api/auth/login/route.ts` against `PROFESSOR_PASSWORD`. Session is stored in an encrypted cookie via `iron-session` (`lib/session.ts`).
 
-**Data layer is Google Sheets** — `lib/sheets.ts` is the only file that touches the Sheets API. Three tabs: `Alunos`, `Aulas`, `Presencas`. The `ensureHeaders` helper auto-creates column headers on first write. Dates from Sheets are serial numbers (e.g. `46181`) and must be converted via `normalizeDate`. Always append to `SheetName!A:A` (not `A1`) to avoid the column-shift bug.
+**Data layer is Postgres (Neon)** — `lib/db.ts` is the only file that touches the database, via the `@neondatabase/serverless` HTTP driver. The client is created lazily (`getSql()`) so the build doesn't require `DATABASE_URL`. Tables: `alunos`, `aulas`, `presencas`, `graduacoes`, `ia_usos` (see `schema.sql`). **Dates are stored as `text` in ISO `YYYY-MM-DD`** — the whole app treats dates as strings, so there's no serial/timezone conversion. FKs use `ON DELETE CASCADE`, so deleting an aluno/aula removes its presenças (and graduações) automatically. Multi-statement writes (createPresencas, setPresencas) use `sql.transaction([...])`.
 
 **Route structure**
 
@@ -40,10 +38,10 @@ See `SETUP.md` for full setup. All must be in `.env.local`:
 - `app/login/` — public login page
 - `app/api/` — API routes:
   - `auth/login` & `auth/logout` — session management
-  - `alunos` (GET/POST) + `alunos/[id]` (PUT/DELETE)
-  - `aulas` (GET/POST)
+  - `alunos` (GET/POST) + `alunos/[id]` (GET perfil / PUT / DELETE) + `alunos/[id]/graduar` (POST)
+  - `aulas` (GET/POST) + `aulas/[id]` (GET / PUT / DELETE)
   - `dashboard` — aggregate stats
-  - `ai/sugestao` — calls Claude to suggest the next training session
+  - `ai/sugestao` & `ai/usos` — Claude next-session suggestion (currently unused in the redesigned UI)
 
 **AI integration** — `lib/ai.ts` calls `claude-haiku-4-5-20251001` with a structured prompt; expects a raw JSON response and extracts it with a regex. The route is GET-only (no auth check), so it reads the last 10 sessions + active students and returns a `SugestaoIA` object.
 
@@ -51,7 +49,7 @@ See `SETUP.md` for full setup. All must be in `.env.local`:
 
 ## Key types (`types/index.ts`)
 
-`Aluno`, `Aula`, `Presenca`, `AulaComPresencas`, `SugestaoIA` — all domain types live here. `Faixa` covers belt colors from Branca to Preta (includes Cinza/Amarela/Laranja/Verde for kids belts).
+`Aluno`, `Aula`, `Presenca`, `AulaComPresencas`, `Graduacao`, `PresencaResumo`, `AlunoPerfil`, `SugestaoIA` — all domain types live here. `Faixa` covers belt colors from Branca to Preta (includes Cinza/Amarela/Laranja/Verde for kids belts).
 
 ## UI
 

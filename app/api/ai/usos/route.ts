@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getIAUsosHoje } from '@/lib/sheets'
+import { getIAUsosHoje } from '@/lib/db'
 
 const LIMITE_IA = 3
 

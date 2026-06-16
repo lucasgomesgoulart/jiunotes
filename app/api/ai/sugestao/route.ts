@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getAlunos, getUltimasAulas, getIAUsosHoje, incrementIAUsos } from '@/lib/sheets'
+import { getAlunos, getUltimasAulas, getIAUsosHoje, incrementIAUsos } from '@/lib/db'
 import { gerarSugestaoTreino } from '@/lib/ai'
 
 const LIMITE_IA = 3

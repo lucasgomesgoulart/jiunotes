@@ -2,37 +2,41 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Aluno, AulaComPresencas, Faixa } from '@/types'
 import { AulaCard, Presente } from '@/components/aula-card'
 import { TopHeader } from '@/components/layout/top-header'
+import { cn } from '@/lib/utils'
 
 /**
  * Aulas — Versão final "D1 cartões grandes" com ações explícitas.
  * Cada cartão tem: data grande, categoria colorida, avatares dos presentes,
- * botão "Editar" (→ /aulas/[id]/editar) e lixeira (com desfazer em 5s).
+ * botão "Editar" (→ /aulas/[id]/editar) e lixeira (com desfazer).
  *
- * Mantém os fetches /api/aulas e /api/alunos. Usa DELETE /api/aulas/[id].
+ * Mantém os fetches /api/aulas e /api/alunos existentes.
+ * Adicionar DELETE /api/aulas/[id] para a exclusão.
  */
 
 function Trash({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 7h16" /><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-      <path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" />
-      <path d="M10 11v6M14 11v6" />
+      <path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      <path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/>
+      <path d="M10 11v6M14 11v6"/>
     </svg>
   )
 }
 
 export default function AulasPage() {
+  const router = useRouter()
   const [aulas, setAulas] = useState<AulaComPresencas[]>([])
   const [alunos, setAlunos] = useState<Aluno[]>([])
   const [apagada, setApagada] = useState<AulaComPresencas | null>(null)
   const [desfazerTimer, setDesfazerTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    fetch('/api/aulas').then((r) => r.json()).then((d) => setAulas(Array.isArray(d) ? d : [])).catch(() => {})
-    fetch('/api/alunos').then((r) => r.json()).then((d) => setAlunos(Array.isArray(d) ? d : [])).catch(() => {})
+    fetch('/api/aulas').then((r) => r.json()).then(setAulas).catch(() => {})
+    fetch('/api/alunos').then((r) => r.json()).then(setAlunos).catch(() => {})
   }, [])
 
   const mapaAluno = useMemo(() => {
