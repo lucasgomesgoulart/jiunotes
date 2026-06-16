@@ -24,7 +24,7 @@ const FAIXAS: { nome: Faixa; bg: string; fg: string }[] = [
   { nome: 'Azul',    bg: '#1A5FD0', fg: '#ffffff' },
   { nome: 'Roxa',    bg: '#7B2FBF', fg: '#ffffff' },
   { nome: 'Marrom',  bg: '#8A4B16', fg: '#ffffff' },
-  { nome: 'Preta',   bg: '#17171A', fg: '#ffffff' },
+  { nome: 'Preta',   bg: '#2A2A30', fg: '#ffffff' },
 ]
 
 interface FaixaSelectorProps {
@@ -46,7 +46,7 @@ export function FaixaSelector({ value, onChange, className }: FaixaSelectorProps
             onClick={() => onChange(nome)}
             aria-pressed={selected}
             className={cn(
-              'relative h-12 w-full overflow-hidden rounded-[10px] outline-none transition-transform active:scale-[0.99]',
+              'relative h-12 w-full overflow-hidden rounded-[10px] border border-white/15 outline-none transition-transform active:scale-[0.99]',
               selected && 'ring-[3px] ring-primary'
             )}
             style={{
@@ -65,8 +65,11 @@ export function FaixaSelector({ value, onChange, className }: FaixaSelectorProps
             >
               {nome}
             </span>
-            {/* ponteira preta */}
-            <span className="absolute right-0 top-0 h-full w-[26%] bg-[#141414]" />
+            {/* ponteira preta (com separação clara da faixa e do fundo) */}
+            <span
+              className="absolute right-0 top-0 h-full w-[26%] bg-[#141414]"
+              style={{ boxShadow: 'inset 2px 0 0 rgba(255,255,255,0.14), inset -1px 0 0 rgba(255,255,255,0.10)' }}
+            />
             {/* check da selecionada */}
             {selected && (
               <span className="absolute right-2.5 top-1/2 flex h-[26px] w-[26px] -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_2px_8px_rgba(0,0,0,0.4)]">

@@ -144,6 +144,11 @@
     background-attachment: fixed;
     background-repeat: no-repeat;
   }
+  /* Nunca permitir rolagem horizontal — o app é mobile e deve caber na largura da tela */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
   html {
     @apply font-sans;
   }

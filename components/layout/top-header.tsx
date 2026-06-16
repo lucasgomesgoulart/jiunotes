@@ -17,7 +17,7 @@ export function TopHeader({ title, action, showLogout }: TopHeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-40 flex items-end justify-between gap-3 bg-gradient-to-b from-background to-transparent px-5 pt-12 pb-3">
+    <header className="sticky top-0 z-40 flex items-end justify-between gap-3 bg-background px-5 pt-12 pb-3">
       <h1 className="font-display text-3xl leading-none tracking-wide uppercase">{title}</h1>
       <div className="flex items-center gap-2">
         {action}
