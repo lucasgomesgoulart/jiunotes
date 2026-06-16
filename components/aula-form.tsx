@@ -153,7 +153,7 @@ export function AulaForm({ aula }: AulaFormProps) {
       </header>
 
       {/* corpo: tudo numa rolagem */}
-      <div className="mx-auto w-full max-w-sm flex-1 overflow-y-auto px-5 pb-4">
+      <div className="mx-auto w-full max-w-sm flex-1 overflow-y-auto px-5">
         <NumLabel n={1}>Tipo</NumLabel>
         <div className="flex gap-3">
           {TIPOS.map((t) => (
@@ -317,7 +317,7 @@ export function AulaForm({ aula }: AulaFormProps) {
       </div>
 
       {/* salvar fixo */}
-      <div className="shrink-0 border-t border-border bg-background/85 px-5 pb-8 pt-3 backdrop-blur">
+      <div className="shrink-0 border-t border-border bg-background/85 px-5 pb-6 pt-3 backdrop-blur">
         <button
           onClick={submit}
           disabled={!podeSalvar || loading}

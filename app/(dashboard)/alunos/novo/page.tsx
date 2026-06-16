@@ -135,7 +135,7 @@ export default function NovoAlunoPage() {
       </div>
 
       {/* Rodapé fixo — botão de ação sempre visível, sem precisar rolar */}
-      <div className="shrink-0 border-t border-border bg-background px-5 pb-8 pt-3">
+      <div className="shrink-0 border-t border-border bg-background px-5 pb-6 pt-3">
         <div className="mx-auto w-full max-w-sm">
           {step < TOTAL_STEPS ? (
             <Button className="h-13 w-full text-base" onClick={next} disabled={!canProceed}>
