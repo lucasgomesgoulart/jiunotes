@@ -16,14 +16,35 @@ import { TopHeader } from '@/components/layout/top-header'
  */
 export default function AlunosPage() {
   const [alunos, setAlunos] = useState<Aluno[]>([])
+  const [professorId, setProfessorId] = useState('jiu123')
   const [confirmando, setConfirmando] = useState<Aluno | null>(null)
   const [inativando, setInativando] = useState(false)
 
   useEffect(() => {
-    fetch('/api/alunos')
-      .then((r) => r.json())
-      .then((data: Aluno[]) => setAlunos(Array.isArray(data) ? data.filter((a) => a.status === 'Ativo') : []))
-      .catch(() => setAlunos([]))
+    // Pega professor logado
+    const fetchAlunosOrdenados = async () => {
+      try {
+        const sessionRes = await fetch('/api/session')
+        const session = await sessionRes.json()
+        const prof = session.professorName || 'jiu123'
+        setProfessorId(prof)
+
+        const alunosRes = await fetch('/api/alunos')
+        const data: Aluno[] = await alunosRes.json()
+
+        if (Array.isArray(data)) {
+          const ativos = data.filter((a) => a.status === 'Ativo')
+          // Ordena: meus alunos primeiro, depois do outro professor
+          const meus = ativos.filter((a) => a.professorId === prof)
+          const outros = ativos.filter((a) => a.professorId !== prof)
+          setAlunos([...meus, ...outros])
+        }
+      } catch {
+        setAlunos([])
+      }
+    }
+
+    fetchAlunosOrdenados()
   }, [])
 
   async function confirmarInativar() {
@@ -55,10 +76,19 @@ export default function AlunosPage() {
         <p className="mb-4 text-sm font-semibold text-muted-foreground">{alunos.length} alunos ativos</p>
 
         <div className="space-y-3">
-          {alunos.map((aluno) => (
+          {alunos.map((aluno) => {
+            const ehOutroProfessor = aluno.professorId !== professorId
+            return (
             <div key={aluno.id} className="rounded-2xl border border-border bg-card p-4">
               {/* nome + faixa */}
-              <p className="text-[17px] font-bold tracking-tight">{aluno.nome}</p>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-[17px] font-bold tracking-tight flex-1">{aluno.nome}</p>
+                {ehOutroProfessor && (
+                  <span className="whitespace-nowrap rounded-full bg-amber-500/15 px-2.5 py-1 text-[10px] font-bold text-amber-400">
+                    Outro prof
+                  </span>
+                )}
+              </div>
               <div className="mt-2 flex items-center gap-2.5">
                 <Belt faixa={aluno.faixa} graus={aluno.graus} width={48} />
                 <span className="text-[12.5px] font-semibold text-muted-foreground">
@@ -78,7 +108,8 @@ export default function AlunosPage() {
                 </button>
               </div>
             </div>
-          ))}
+          )
+          })}
           {alunos.length === 0 && (
             <p className="py-10 text-center text-sm text-muted-foreground">Nenhum aluno ativo.</p>
           )}
