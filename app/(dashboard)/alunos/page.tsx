@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Aluno } from '@/types'
-import { FaixaBadge } from '@/components/faixa-badge'
+import { Belt } from '@/components/belt'
 import { TopHeader } from '@/components/layout/top-header'
 import { Button } from '@/components/ui/button'
 
@@ -59,16 +59,17 @@ export default function AlunosPage() {
           </div>
         ) : (
           alunos.map((aluno) => (
-            <div key={aluno.id} className="bg-background rounded-2xl border-2 border-border flex items-center gap-3 px-4 py-3.5">
+            <div key={aluno.id} className="bg-card rounded-2xl border border-white/10 flex items-center gap-3 px-4 py-3.5">
+              <Belt faixa={aluno.faixa} graus={aluno.graus} width={48} className="shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm truncate">{aluno.nome}</p>
-                <div className="mt-1.5">
-                  <FaixaBadge faixa={aluno.faixa} graus={aluno.graus} />
-                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Faixa {aluno.faixa}{aluno.graus > 0 ? ` · ${aluno.graus}º grau` : ''}
+                </p>
               </div>
               <button
                 onClick={() => setConfirmando(aluno)}
-                className="shrink-0 text-xs font-medium text-muted-foreground border border-border rounded-xl px-3 py-2 hover:border-destructive/50 hover:text-destructive transition-colors"
+                className="shrink-0 text-xs font-medium text-muted-foreground border border-white/15 rounded-xl px-3 py-2 hover:border-destructive/50 hover:text-destructive transition-colors"
               >
                 Inativar
               </button>
@@ -84,12 +85,12 @@ export default function AlunosPage() {
           onClick={() => !inativando && setConfirmando(null)}
         >
           <div
-            className="w-full max-w-sm bg-background rounded-3xl p-6 space-y-5 shadow-2xl"
+            className="w-full max-w-sm bg-popover border border-white/10 rounded-3xl p-6 space-y-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Ícone */}
             <div className="flex justify-center">
-              <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center text-3xl">
+              <div className="w-16 h-16 rounded-full bg-amber-500/15 flex items-center justify-center text-3xl">
                 ⚠️
               </div>
             </div>

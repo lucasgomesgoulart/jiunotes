@@ -5,31 +5,8 @@ import Link from 'next/link'
 import { AulaComPresencas, CategoriaAula } from '@/types'
 import { TopHeader } from '@/components/layout/top-header'
 import { Button } from '@/components/ui/button'
+import { catChipStyle, catSelectedStyle, TIPO_COLOR } from '@/lib/categorias'
 import { cn } from '@/lib/utils'
-
-// Cor de cada categoria
-const CATEGORIA_STYLE: Record<string, { bg: string; text: string }> = {
-  'Passagem de Guarda': { bg: 'bg-blue-100',   text: 'text-blue-700' },
-  'Guarda':             { bg: 'bg-indigo-100',  text: 'text-indigo-700' },
-  'Quedas':             { bg: 'bg-red-100',     text: 'text-red-700' },
-  'Meia Guarda':        { bg: 'bg-purple-100',  text: 'text-purple-700' },
-  'Costas':             { bg: 'bg-green-100',   text: 'text-green-700' },
-  'Finalizações':       { bg: 'bg-rose-100',    text: 'text-rose-700' },
-  'Defesa Pessoal':     { bg: 'bg-amber-100',   text: 'text-amber-700' },
-  'Outro':              { bg: 'bg-gray-100',    text: 'text-gray-600' },
-}
-
-// Chip selecionado usa fundo sólido
-const CATEGORIA_SELECTED: Record<string, { bg: string; text: string }> = {
-  'Passagem de Guarda': { bg: 'bg-blue-500',   text: 'text-white' },
-  'Guarda':             { bg: 'bg-indigo-600',  text: 'text-white' },
-  'Quedas':             { bg: 'bg-red-500',     text: 'text-white' },
-  'Meia Guarda':        { bg: 'bg-purple-600',  text: 'text-white' },
-  'Costas':             { bg: 'bg-green-600',   text: 'text-white' },
-  'Finalizações':       { bg: 'bg-rose-600',    text: 'text-white' },
-  'Defesa Pessoal':     { bg: 'bg-amber-500',   text: 'text-white' },
-  'Outro':              { bg: 'bg-gray-600',    text: 'text-white' },
-}
 
 function formatarData(iso: string) {
   if (!iso) return '—'
@@ -148,22 +125,20 @@ export default function AulasPage() {
               const total = contagem[cat] ?? 0
               const disabled = total === 0
               const sel = filtro === cat
-              const style = sel ? CATEGORIA_SELECTED[cat] : CATEGORIA_STYLE[cat]
 
               return (
                 <button
                   key={cat}
                   disabled={disabled}
                   onClick={() => setFiltro(sel ? null : cat)}
+                  style={disabled ? undefined : sel ? catSelectedStyle(cat) : catChipStyle(cat)}
                   className={cn(
                     'rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
                     disabled
                       ? 'bg-muted/30 text-muted-foreground/30 cursor-not-allowed'
-                      : cn(
-                          style?.bg ?? 'bg-muted',
-                          style?.text ?? 'text-muted-foreground',
-                          sel ? 'shadow-sm scale-[1.04]' : 'active:scale-95'
-                        )
+                      : sel
+                        ? 'border shadow-sm scale-[1.04]'
+                        : 'border border-transparent active:scale-95'
                   )}
                 >
                   {chip}
@@ -238,18 +213,18 @@ export default function AulasPage() {
           </div>
         ) : (
           aulasFiltradas.map((aula) => {
-            const catStyle = CATEGORIA_STYLE[aula.categoria] ?? { bg: 'bg-gray-100', text: 'text-gray-600' }
+            const tipoColor = TIPO_COLOR[aula.tipo] ?? TIPO_COLOR.Kimono
             return (
-              <div key={aula.id} className="rounded-3xl border-2 border-border bg-background overflow-hidden">
-                {/* Topo colorido */}
-                <div className={cn(
-                  'px-5 py-3 flex items-center justify-between',
-                  aula.tipo === 'Kimono' ? 'bg-blue-600' : 'bg-orange-500'
-                )}>
-                  <span className="text-white font-bold text-sm">
+              <div key={aula.id} className="rounded-3xl border border-white/10 bg-card overflow-hidden">
+                {/* Topo com acento do tipo */}
+                <div
+                  className="px-5 py-3 flex items-center justify-between border-b border-white/10"
+                  style={{ background: `${tipoColor}1f` }}
+                >
+                  <span className="font-bold text-sm" style={{ color: tipoColor }}>
                     {aula.tipo === 'Kimono' ? '🥋 Kimono' : '💪 NoGi'}
                   </span>
-                  <span className="text-white/80 text-sm font-medium">
+                  <span className="text-muted-foreground text-sm font-medium">
                     {formatarDataCurta(aula.data)}
                   </span>
                 </div>
@@ -262,16 +237,16 @@ export default function AulasPage() {
                   <p className="font-bold text-lg leading-snug">{aula.conteudoPrincipal}</p>
 
                   {/* Tag colorida e maior */}
-                  <span className={cn(
-                    'inline-block text-sm font-semibold px-4 py-1.5 rounded-full',
-                    catStyle.bg, catStyle.text
-                  )}>
+                  <span
+                    className="inline-block text-sm font-semibold px-4 py-1.5 rounded-full"
+                    style={catChipStyle(aula.categoria)}
+                  >
                     {aula.categoria}
                   </span>
                 </div>
 
                 {/* Rodapé */}
-                <div className="px-5 py-3 border-t-2 border-border flex items-center gap-2">
+                <div className="px-5 py-3 border-t border-white/10 flex items-center gap-2">
                   <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-muted-foreground" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
                     <circle cx="9" cy="7" r="4" />

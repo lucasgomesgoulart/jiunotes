@@ -41,8 +41,8 @@ export function BottomNav() {
   const router = useRouter()
 
   return (
-    <div className="fixed bottom-6 left-0 right-0 z-50 flex justify-center">
-      <div className="inline-flex items-center gap-1 rounded-full bg-black/90 px-3 py-2 backdrop-blur border border-primary">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center px-4 pb-8 pt-2.5">
+      <div className="flex w-full max-w-sm items-center gap-1 rounded-3xl border border-white/10 bg-[#16181e]/92 px-2 py-3 shadow-[0_-6px_24px_rgba(0,0,0,0.4)] backdrop-blur">
         {NAV_ITEMS.map((item) => {
           const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
           return (
@@ -50,12 +50,21 @@ export function BottomNav() {
               key={item.href}
               onClick={() => router.push(item.href)}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 rounded-full px-7 py-2 transition-all active:scale-95',
-                active ? 'text-white' : 'text-neutral-500 hover:text-neutral-300'
+                'flex flex-1 flex-col items-center gap-1.5 transition-all active:scale-95',
+                active ? 'text-white' : 'text-muted-foreground hover:text-foreground/80'
               )}
             >
-              {item.icon}
-              <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
+              <span
+                className={cn(
+                  'flex h-[34px] w-[46px] items-center justify-center rounded-xl transition-colors',
+                  active && 'bg-primary text-primary-foreground shadow-[var(--neon-glow)]'
+                )}
+              >
+                {item.icon}
+              </span>
+              <span className={cn('text-[11px] tracking-wide', active ? 'font-bold' : 'font-semibold')}>
+                {item.label}
+              </span>
             </button>
           )
         })}

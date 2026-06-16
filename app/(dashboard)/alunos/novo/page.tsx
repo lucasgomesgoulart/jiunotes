@@ -9,25 +9,8 @@ import { FloatingInput } from '@/components/ui/floating-input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { FaixaSelector } from '@/components/faixa-selector'
 import { cn } from '@/lib/utils'
-
-const FAIXAS: {
-  value: Faixa
-  label: string
-  bg: string
-  text: string
-  ring: string
-}[] = [
-  { value: 'Branca',  label: 'Branca',  bg: 'bg-white border-2 border-gray-200',  text: 'text-gray-800', ring: 'ring-gray-300' },
-  { value: 'Cinza',   label: 'Cinza',   bg: 'bg-gray-400',     text: 'text-white',        ring: 'ring-gray-400' },
-  { value: 'Amarela', label: 'Amarela', bg: 'bg-yellow-400',   text: 'text-yellow-900',   ring: 'ring-yellow-400' },
-  { value: 'Laranja', label: 'Laranja', bg: 'bg-orange-500',   text: 'text-white',        ring: 'ring-orange-500' },
-  { value: 'Verde',   label: 'Verde',   bg: 'bg-green-500',    text: 'text-white',        ring: 'ring-green-500' },
-  { value: 'Azul',    label: 'Azul',    bg: 'bg-blue-600',     text: 'text-white',        ring: 'ring-blue-600' },
-  { value: 'Roxa',    label: 'Roxa',    bg: 'bg-purple-600',   text: 'text-white',        ring: 'ring-purple-600' },
-  { value: 'Marrom',  label: 'Marrom',  bg: 'bg-amber-800',    text: 'text-white',        ring: 'ring-amber-800' },
-  { value: 'Preta',   label: 'Preta',   bg: 'bg-gray-950',     text: 'text-white',        ring: 'ring-gray-950' },
-]
 
 const GRAUS = [0, 1, 2, 3, 4]
 const TOTAL_STEPS = 4
@@ -122,30 +105,10 @@ export default function NovoAlunoPage() {
               <h2 className="text-2xl font-bold tracking-tight">Qual a faixa atual?</h2>
               <p className="text-muted-foreground text-sm">Toque na faixa do aluno.</p>
             </div>
-            <RadioGroup
-              value={form.faixa}
-              onValueChange={(v) => v && setForm((p) => ({ ...p, faixa: v as Faixa }))}
-              className="grid grid-cols-3 gap-3"
-            >
-              {FAIXAS.map((f) => (
-                <label
-                  key={f.value}
-                  className={cn(
-                    'relative flex flex-col items-center justify-center gap-2 rounded-2xl px-2 py-5 text-center cursor-pointer transition-all active:scale-95 shadow-sm',
-                    f.bg,
-                    form.faixa === f.value && `ring-4 ring-offset-2 ${f.ring} scale-105 shadow-lg`
-                  )}
-                >
-                  <RadioGroupItem
-                    id={`${id}-${f.value}`}
-                    value={f.value}
-                    className="sr-only after:absolute after:inset-0"
-                  />
-                  <span className="text-3xl leading-none">🥋</span>
-                  <span className={cn('text-xs font-bold tracking-wide', f.text)}>{f.label.toUpperCase()}</span>
-                </label>
-              ))}
-            </RadioGroup>
+            <FaixaSelector
+              value={form.faixa || undefined}
+              onChange={(faixa) => setForm((p) => ({ ...p, faixa }))}
+            />
             <Button className="w-full h-13 text-base" onClick={next} disabled={!canProceed}>
               Próximo
             </Button>

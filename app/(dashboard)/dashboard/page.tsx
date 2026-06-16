@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Aluno, Aula } from '@/types'
-import { FaixaBadge } from '@/components/faixa-badge'
+import { Belt } from '@/components/belt'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { TopHeader } from '@/components/layout/top-header'
 import { SugestaoIA } from '@/types'
+import { CAT_COLOR, tipoChipStyle } from '@/lib/categorias'
 import { cn } from '@/lib/utils'
 
 interface DashboardData {
@@ -102,22 +103,22 @@ export default function DashboardPage() {
         )}
 
         {/* CTA Cadastrar aula */}
-        <div className="rounded-2xl bg-slate-800 p-5 text-white space-y-3">
+        <div className="rounded-2xl border border-white/10 bg-card p-5 space-y-3">
           <div>
             <p className="font-bold text-base">Cadastrar aula</p>
-            <p className="text-xs text-white/60 mt-0.5">Registre o treino de hoje ou peça uma sugestão à IA</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Registre o treino de hoje ou peça uma sugestão à IA</p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={prepararProximaAula}
               disabled={restantesIA !== null && restantesIA <= 0}
-              className="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 border border-white/15 hover:bg-white/5 text-foreground text-sm font-semibold py-2.5 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {restantesIA === null ? 'Sugestão IA' : restantesIA <= 0 ? 'Limite atingido' : `Sugestão IA (${restantesIA}/${LIMITE_IA})`}
             </button>
             <Link
               href="/aulas/nova"
-              className="flex-1 bg-white text-slate-800 text-sm font-semibold py-2.5 rounded-xl transition-colors text-center"
+              className="flex-1 bg-cta-dojo text-white text-sm font-semibold py-2.5 rounded-xl transition-colors text-center shadow-[var(--neon-glow)]"
             >
               Nova aula
             </Link>
@@ -167,11 +168,16 @@ export default function DashboardPage() {
             <p className="font-semibold text-sm text-foreground">Mais presentes em {data.mesNome}</p>
             <div className="space-y-2">
               {data.topAlunos.map((aluno, i) => (
-                <div key={aluno.id} className="flex items-center gap-3 bg-background rounded-xl px-4 py-3">
+                <div key={aluno.id} className="flex items-center gap-3 bg-white/[0.03] rounded-xl px-4 py-3">
                   <span className="text-sm font-bold text-muted-foreground w-5 shrink-0">{i + 1}</span>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">{aluno.nome}</p>
-                    <FaixaBadge faixa={aluno.faixa} graus={aluno.graus} />
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <Belt faixa={aluno.faixa} graus={aluno.graus} width={40} />
+                      <span className="text-xs text-muted-foreground">
+                        {aluno.faixa}{aluno.graus > 0 ? ` · ${aluno.graus}º` : ''}
+                      </span>
+                    </div>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-bold text-primary text-base">{aluno.presencas} aulas</p>
@@ -196,16 +202,18 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-2">
               {data.ultimasAulas.map((aula) => (
-                <div key={aula.id} className="flex items-center gap-3 bg-background rounded-xl px-4 py-3">
+                <div key={aula.id} className="flex items-center gap-3 bg-white/[0.03] rounded-xl px-4 py-3">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-base truncate">{aula.conteudoPrincipal}</p>
-                    <p className="text-sm text-muted-foreground mt-0.5">{aula.categoria}</p>
+                    <p className="text-sm mt-0.5 font-medium" style={{ color: CAT_COLOR[aula.categoria] ?? CAT_COLOR['Outro'] }}>
+                      {aula.categoria}
+                    </p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-semibold text-foreground">
                       {new Date(aula.data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                     </p>
-                    <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full', aula.tipo === 'Kimono' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700')}>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={tipoChipStyle(aula.tipo)}>
                       {aula.tipo}
                     </span>
                   </div>

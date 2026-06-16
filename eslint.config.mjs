@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Design handoff reference prototype (not production source).
+    "design_handoff_jiunotes/**",
   ]),
 ]);
 
