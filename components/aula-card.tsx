@@ -1,27 +1,20 @@
 'use client'
 
-import { Faixa } from '@/types'
+import { CategoriaAula, Faixa } from '@/types'
+import { CAT_COLOR } from '@/lib/categorias'
 import { Belt } from './belt'
 
 /**
  * AulaCard — Direção D1 ("cartões grandes"), aprovada para a tela de Aulas.
  * Uma aula por bloco: barra de cor da categoria, data grande, presentes como
- * avatares (iniciais + anel na cor da faixa).
+ * avatares (iniciais + anel na cor da faixa). A categoria pode ter várias tags
+ * (string separada por ", ") — cada uma vira um chip colorido.
  *
  * A página resolve os IDs de presença (Aula.presencas: string[]) para
  * { nome, faixa } antes de passar para cá.
  */
 
-const CAT_COLOR: Record<string, string> = {
-  'Passagem de Guarda': '#4D8DFF',
-  'Guarda': '#8C8CFF',
-  'Quedas': '#FF6B5E',
-  'Meia Guarda': '#B07BFF',
-  'Costas': '#4CC474',
-  'Finalizações': '#FF6B8E',
-  'Defesa Pessoal': '#FFB13D',
-  'Outro': '#A8A8B0',
-}
+const corDaCategoria = (cat: string): string => CAT_COLOR[cat as CategoriaAula] ?? '#A8A8B0'
 
 const BELT_RING: Record<Faixa, string> = {
   Branca: '#E9E4D6', Cinza: '#8E959C', Amarela: '#F5C518', Laranja: '#F2700A',
@@ -52,7 +45,8 @@ function Avatar({ nome, faixa, size = 36 }: { nome: string; faixa: Faixa; size?:
 }
 
 export function AulaCard({ data, tipo, categoria, conteudo, presentes, onClick }: AulaCardProps) {
-  const cor = CAT_COLOR[categoria] ?? '#A8A8B0'
+  const cats = categoria.split(',').map((c) => c.trim()).filter(Boolean)
+  const cor = corDaCategoria(cats[0] ?? '')
   const d = new Date(data + 'T00:00:00')
   const dia = String(d.getDate()).padStart(2, '0')
   const semana = d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '')
@@ -71,12 +65,20 @@ export function AulaCard({ data, tipo, categoria, conteudo, presentes, onClick }
             <div className="mt-0.5 text-[11.5px] font-extrabold uppercase tracking-wide text-muted-foreground">{semana}</div>
           </div>
           <div className="min-w-0 flex-1">
-            <span
-              className="mb-1.5 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-[5px] text-xs font-extrabold"
-              style={{ background: cor + '26', color: cor }}
-            >
-              {categoria}
-            </span>
+            <div className="mb-1.5 flex flex-wrap gap-1.5">
+              {cats.map((cat) => {
+                const c = corDaCategoria(cat)
+                return (
+                  <span
+                    key={cat}
+                    className="inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-[5px] text-xs font-extrabold"
+                    style={{ background: c + '26', color: c }}
+                  >
+                    {cat}
+                  </span>
+                )
+              })}
+            </div>
             <div className="text-xl font-extrabold tracking-tight">{conteudo}</div>
           </div>
         </div>

@@ -14,9 +14,13 @@ export type TipoAula = 'Kimono' | 'NoGi'
 export type CategoriaAula =
   | 'Passagem de Guarda'
   | 'Guarda'
-  | 'Quedas'
   | 'Meia Guarda'
+  | '100 Kilos'
+  | 'Montada'
+  | 'Joelho no Barriga'
   | 'Costas'
+  | 'Raspagem'
+  | 'Quedas'
   | 'Finalizações'
   | 'Defesa Pessoal'
   | 'Outro'
@@ -35,7 +39,8 @@ export interface Aula {
   data: string
   tipo: TipoAula
   conteudoPrincipal: string
-  categoria: CategoriaAula
+  /** Uma ou mais categorias, separadas por ", " (ex.: "Quedas, Passagem de Guarda"). */
+  categoria: string
 }
 
 export interface Presenca {
@@ -59,7 +64,7 @@ export interface Graduacao {
 export interface PresencaResumo {
   idAula: string
   data: string
-  categoria: CategoriaAula
+  categoria: string
   conteudo: string
 }
 

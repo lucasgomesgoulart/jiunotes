@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { CalendarIcon } from 'lucide-react'
 import { Aluno, AulaComPresencas, CategoriaAula, TipoAula } from '@/types'
+import { CAT_COLOR } from '@/lib/categorias'
 import { Textarea } from '@/components/ui/textarea'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -13,11 +14,11 @@ import { cn } from '@/lib/utils'
 
 /**
  * AulaForm — formulário "uma tela só" compartilhado entre Nova aula e Editar aula.
- * Sem wizard: Tipo · Quando · O que treinou · O que foi passado (texto + ditado
- * por voz via MicButton) · Quem veio. "Salvar" fixo embaixo.
- *
  * - Sem `aula`  → modo criação  (POST /api/aulas)
  * - Com `aula`  → modo edição   (PUT /api/aulas/[id]) + botão Apagar (DELETE)
+ *
+ * A categoria aceita VÁRIAS tags por aula (ex.: "Quedas, Passagem de Guarda").
+ * Guardamos como string separada por ", ".
  */
 
 const TIPOS: { value: TipoAula; label: string }[] = [
@@ -25,16 +26,13 @@ const TIPOS: { value: TipoAula; label: string }[] = [
   { value: 'NoGi', label: 'NoGi' },
 ]
 
-const CATEGORIAS: { value: CategoriaAula; cor: string }[] = [
-  { value: 'Passagem de Guarda', cor: '#4D8DFF' },
-  { value: 'Guarda', cor: '#8C8CFF' },
-  { value: 'Quedas', cor: '#FF6B5E' },
-  { value: 'Meia Guarda', cor: '#B07BFF' },
-  { value: 'Costas', cor: '#4CC474' },
-  { value: 'Finalizações', cor: '#FF6B8E' },
-  { value: 'Defesa Pessoal', cor: '#FFB13D' },
-  { value: 'Outro', cor: '#A8A8B0' },
-]
+// Fonte única: a ordem/cores das tags vêm de lib/categorias.
+const CATEGORIAS = (Object.keys(CAT_COLOR) as CategoriaAula[]).map((value) => ({ value, cor: CAT_COLOR[value] }))
+
+function parseCategorias(s?: string): CategoriaAula[] {
+  if (!s) return []
+  return s.split(',').map((x) => x.trim()).filter(Boolean) as CategoriaAula[]
+}
 
 function NumLabel({ n, children }: { n: number; children: React.ReactNode }) {
   return (
@@ -57,10 +55,10 @@ export function AulaForm({ aula }: AulaFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [alunos, setAlunos] = useState<Aluno[]>([])
   const [presentes, setPresentes] = useState<Set<string>>(new Set(aula?.presencas ?? []))
+  const [categorias, setCategorias] = useState<Set<CategoriaAula>>(new Set(parseCategorias(aula?.categoria)))
   const [form, setForm] = useState({
     tipo: (aula?.tipo ?? 'Kimono') as TipoAula,
     data: aula ? new Date(aula.data + 'T00:00:00') : new Date(),
-    categoria: (aula?.categoria ?? '') as CategoriaAula | '',
     conteudoPrincipal: aula?.conteudoPrincipal ?? '',
   })
 
@@ -80,7 +78,16 @@ export function AulaForm({ aula }: AulaFormProps) {
     })
   }
 
-  const podeSalvar = !!form.categoria && form.conteudoPrincipal.trim().length > 0
+  function toggleCategoria(value: CategoriaAula) {
+    setCategorias((prev) => {
+      const next = new Set(prev)
+      if (next.has(value)) next.delete(value)
+      else next.add(value)
+      return next
+    })
+  }
+
+  const podeSalvar = categorias.size > 0 && form.conteudoPrincipal.trim().length > 0
 
   async function submit() {
     if (!podeSalvar) return
@@ -89,7 +96,7 @@ export function AulaForm({ aula }: AulaFormProps) {
     const payload = {
       tipo: form.tipo,
       data: dataStr,
-      categoria: form.categoria || 'Outro',
+      categoria: Array.from(categorias).join(', '),
       conteudoPrincipal: form.conteudoPrincipal,
       presencas: Array.from(presentes),
     }
@@ -183,14 +190,18 @@ export function AulaForm({ aula }: AulaFormProps) {
           </Popover>
         </div>
 
-        <NumLabel n={3}>O que treinou</NumLabel>
+        <NumLabel n={3}>O que foi treinado?</NumLabel>
+        <p className="-mt-1 mb-3 text-[12.5px] font-semibold text-muted-foreground">
+          Pode marcar mais de uma{categorias.size > 0 ? ` · ${categorias.size} selecionada${categorias.size > 1 ? 's' : ''}` : ''}
+        </p>
         <div className="flex flex-wrap gap-2.5">
           {CATEGORIAS.map(({ value, cor }) => {
-            const sel = form.categoria === value
+            const sel = categorias.has(value)
             return (
               <button
                 key={value}
-                onClick={() => setForm((p) => ({ ...p, categoria: value }))}
+                onClick={() => toggleCategoria(value)}
+                aria-pressed={sel}
                 className="whitespace-nowrap rounded-full border-[1.5px] px-[15px] py-2.5 text-[13.5px] font-bold transition-all active:scale-95"
                 style={
                   sel
@@ -198,7 +209,7 @@ export function AulaForm({ aula }: AulaFormProps) {
                     : { borderColor: 'transparent', background: 'rgba(255,255,255,0.08)', color: 'var(--muted-foreground)' }
                 }
               >
-                {value}
+                {sel ? '✓ ' : ''}{value}
               </button>
             )
           })}
